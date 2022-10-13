@@ -5,6 +5,7 @@ import 'package:http/http.dart' as http;
 // import 'package:http/http.dart';
 import 'package:post_api_sample/screens/models/kwilxo_model.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'models/create_user.dart';
 import 'models/items_modification.dart';
 
 
@@ -69,6 +70,34 @@ import 'models/items_modification.dart';
 // }
 class ApiServices{
   String endpoint = "https://kwilox.herokuapp.com/api/v1/fetch-items";
+  Future<http.Response?> postRegister(UserSignUp data) async {
+    http.Response? postRegisterResponse;
+    var url = Uri.parse("https://kwilox.herokuapp.com/api/v1/register-user");
+    Map<String, String> requestHeaders = {
+      "Content-type": "application/json",
+      "Accept": "*/*"
+    };
+
+    try {
+      postRegisterResponse = await http.post(url,
+          headers: requestHeaders, body: jsonEncode(data.toJson()));
+      if (kDebugMode) {
+        print("Response status: ${postRegisterResponse.statusCode}");
+        print("Response body: ${postRegisterResponse.body}");
+      }
+      var responseData = jsonDecode(postRegisterResponse.body);
+      if (kDebugMode) {
+        print(responseData);
+      }
+    } catch (e, s) {
+      if (kDebugMode) {
+        print(e);
+        print(s);
+      }
+    }
+    return postRegisterResponse;
+  }
+
   Future<List<FetchItems>>getUsers()async{
     http.Response response = await http.get(Uri.parse(endpoint));
     if (response.statusCode == 200){

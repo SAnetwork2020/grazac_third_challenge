@@ -15,51 +15,59 @@ class Body extends StatefulWidget {
 class _BodyState extends State<Body> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-
+  bool isLoading = false;
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(
-            height: 20,
-          ),
-          const Text(
-            "Login",
-            textAlign: TextAlign.left,
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30),
-          ),
-          const SizedBox(
-            height: 40,
-          ),
-          TextFormField(
-            controller: emailController,
-            decoration: const InputDecoration(hintText: "Email Address"),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          TextFormField(
-            controller: passwordController,
-            decoration: const InputDecoration(hintText: "Password"),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: () {
-                postLogin(UserLogin(
-                    password: passwordController.text.trim(),
-                    email: emailController.text.trim()));
-              },
-              child: const Text("Log In"),
+      child: isLoading? Center(child: CircularProgressIndicator(),) :Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(
+              height: 20,
             ),
-          ),
-        ],
+            const Text(
+              "Login",
+              textAlign: TextAlign.left,
+              style: TextStyle(fontWeight: FontWeight.w800, fontSize: 30),
+            ),
+            const SizedBox(
+              height: 40,
+            ),
+            TextFormField(
+              controller: emailController,
+              decoration: const InputDecoration(hintText: "Email Address"),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              validator: (value){
+
+              },
+              controller: passwordController,
+              decoration: const InputDecoration(hintText: "Password"),
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+
+                  postLogin(UserLogin(
+                      password: passwordController.text.trim(),
+                      email: emailController.text.trim()));
+                },
+                child: const Text("Log In"),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -71,6 +79,9 @@ class _BodyState extends State<Body> {
       "Content-type": "application/json",
       "Accept": "*/*",
     };
+    setState(() {
+      isLoading = true;
+    });
 
     try {
       postLoginResponse = await http.post(url,
@@ -91,6 +102,9 @@ class _BodyState extends State<Body> {
         print(s);
       }
     }
+    setState(() {
+      isLoading = false;
+    });
     return postLoginResponse;
   }
 }

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:post_api_sample/screens/home_screen/home_screen.dart';
 import 'package:post_api_sample/screens/models/create_user.dart';
 
 class Body extends StatefulWidget {
@@ -18,13 +19,13 @@ class _BodyState extends State<Body> {
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController lastnameController = TextEditingController();
   final TextEditingController firstnameController = TextEditingController();
-
+  bool isLoading = false;
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40.0),
       child: SingleChildScrollView(
-        child: Column(
+        child: isLoading? Center(child: CircularProgressIndicator(),) :Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(
@@ -83,9 +84,8 @@ class _BodyState extends State<Body> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  postRegister(
-                      UserSignUp(
+                onPressed: (){
+                  postRegister(UserSignUp(
                           password: passwordController.text.trim(),
                           email: emailController.text.trim(),
                           age: int.parse(ageController.text.trim()),
@@ -93,7 +93,6 @@ class _BodyState extends State<Body> {
                           lastname: lastnameController.text.trim(),
                           phonenumber: phoneController.text.trim()
                       ));
-
                 },
                 child: const Text("Sign Up"),
               ),
@@ -109,19 +108,26 @@ class _BodyState extends State<Body> {
     var url = Uri.parse("https://kwilox.herokuapp.com/api/v1/register-user");
     Map<String, String> requestHeaders = {
       "Content-type": "application/json",
-      "Accept": "*/*"
+      "Accept": "*/*",
     };
-
+    setState(() {
+      isLoading = true;
+    });
     try {
       postRegisterResponse = await http.post(url,
           headers: requestHeaders, body: jsonEncode(data.toJson()));
-      if (kDebugMode) {
-        print("Response status: ${postRegisterResponse.statusCode}");
-        print("Response body: ${postRegisterResponse.body}");
-      }
-      var responseData = jsonDecode(postRegisterResponse.body);
-      if (kDebugMode) {
-        print(responseData);
+      if (postRegisterResponse.statusCode == 201) {
+        setState(() {
+          isLoading = false;
+        });
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const HomeScreen()));
+        if(kDebugMode){
+          print("Response status: ${postRegisterResponse.statusCode}");
+          print("Response body: ${postRegisterResponse.body}");
+          var responseData = jsonDecode(postRegisterResponse.body);
+          print(responseData);
+        }
       }
     } catch (e, s) {
       if (kDebugMode) {
@@ -129,6 +135,39 @@ class _BodyState extends State<Body> {
         print(s);
       }
     }
+    setState(() {
+      isLoading = false;
+    });
     return postRegisterResponse;
   }
+
+  // Future<http.Response?> postRegister(UserSignUp data) async {
+  //   http.Response? postRegisterResponse;
+  //   var url = Uri.parse("https://kwilox.herokuapp.com/api/v1/register-user");
+  //   Map<String, String> requestHeaders = {
+  //     "Content-type": "application/json",
+  //     "Accept": "*/*"
+  //   };
+  //
+  //   try {
+  //     postRegisterResponse = await http.post(url,
+  //         headers: requestHeaders, body: jsonEncode(data.toJson()));
+  //     if (postRegisterResponse.statusCode == 200); Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));
+  //       if (kDebugMode) {
+  //         print("Response status: ${postRegisterResponse.statusCode}");
+  //         print("Response body: ${postRegisterResponse.body}");
+  //
+  //       var responseData = jsonDecode(postRegisterResponse.body);
+  //       if (kDebugMode) {
+  //         print(responseData);
+  //       }
+  //     }
+  //   } catch (e, s) {
+  //     if (kDebugMode) {
+  //       print(e);
+  //       print(s);
+  //     }
+  //   }
+  //   return postRegisterResponse;
+  // }
 }
